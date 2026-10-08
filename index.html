@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Asisten Penilai LKPD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f4f7fc;--ink:#14213d;--muted:#5b6785;--grid:#d9e2f1;--red:#d62839;--hl:#ffe066;--card:#fff;--line:#c9d4e8;--blue:#2457c5}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font:16px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif;color:var(--ink);background:var(--paper);display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+h1,h2{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",sans-serif;margin:0}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;border-bottom:2px solid var(--ink);background:var(--card)}
+header h1{font-size:1.25rem;font-weight:800}
+header p{margin:0;font-size:.85rem;color:var(--muted)}
+.tabs{display:none}
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(320px,2fr) 3fr}
+.sheet{overflow:auto;padding:20px;border-right:2px solid var(--ink);background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+.sheet h2{font-size:1.1rem;margin-bottom:4px}
+.hint{margin:0 0 12px;font-size:.88rem;color:var(--muted);background:var(--paper);display:inline-block;padding:0 4px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f{display:block;margin-top:10px}
+.f>span{display:inline-block;font-weight:700;font-size:.9rem;background:var(--paper);padding:0 4px;margin-bottom:3px}
+input,textarea{width:100%;padding:8px 10px;border:2px solid var(--ink);border-radius:6px;background:var(--card)}
+textarea{resize:vertical;min-height:60px}
+.item{background:var(--card);border:2px solid var(--ink);border-radius:8px;padding:12px;margin-top:14px}
+.item .f>span{background:var(--card)}
+.ih{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ih input{width:72px;display:inline-block}
+.ih label{font-size:.85rem;font-weight:700}
+.link{border:0;background:none;color:var(--blue);cursor:pointer;text-decoration:underline;font-size:.85rem}
+.chat{display:flex;flex-direction:column;min-height:0;background:var(--card)}
+#log{flex:1;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+.empty{margin:auto;max-width:460px;text-align:center}
+.empty h2{font-size:1.4rem;margin-bottom:6px}
+.empty p{color:var(--muted);margin:0 0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{border:2px solid var(--ink);background:var(--card);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:700;font-size:.9rem}
+.chip:hover{background:var(--hl)}
+.msg{max-width:min(740px,95%)}
+.msg.user{align-self:flex-end;background:var(--ink);color:#fff;padding:10px 14px;border-radius:14px 14px 2px 14px;white-space:pre-wrap}
+.msg.bot{align-self:flex-start;border:2px solid var(--ink);border-radius:2px 14px 14px 14px;padding:12px 16px;overflow-x:auto}
+.msg.bot p{margin:0 0 .6em}.msg.bot>:last-child{margin-bottom:0}
+.msg.bot h3{margin:.2em 0 .4em;font:800 1.05rem "Bricolage Grotesque",sans-serif;background:linear-gradient(transparent 55%,var(--hl) 55%);display:inline-block}
+.msg.bot ul{margin:.3em 0 .6em;padding-left:1.3em}
+table{border-collapse:collapse;font-size:.92rem;width:100%;margin:.5em 0}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--paper)}
+.score{float:right;margin:0 0 6px 12px;width:88px;height:88px;display:grid;place-items:center;border:4px solid var(--red);border-radius:52% 48% 55% 45%/48% 55% 45% 52%;color:var(--red);font:800 1.9rem/1 "Bricolage Grotesque",sans-serif;transform:rotate(-7deg);text-align:center}
+.score small{display:block;font:700 .65rem "Atkinson Hyperlegible",sans-serif;margin-top:3px}
+.ok{color:#1b7f3b;font-weight:700}.bad{color:var(--red);font-weight:700}
+.bar{background:var(--paper);border:1px solid var(--line);height:12px;border-radius:6px;min-width:90px}
+.bar i{display:block;height:100%;background:var(--blue);border-radius:5px}
+.bar i.low{background:var(--red)}
+.note{font-size:.85rem;color:var(--muted)}
+.quick{display:flex;flex-wrap:wrap;gap:6px;padding:8px 20px 0}
+.quick .chip{padding:4px 10px;font-size:.82rem}
+form{display:flex;gap:10px;padding:12px 20px;border-top:2px solid var(--ink);align-items:flex-end}
+form textarea{min-height:44px;max-height:120px;flex:1}
+.btn{border:2px solid var(--ink);background:var(--hl);font-weight:800;border-radius:6px;padding:9px 16px;cursor:pointer}
+.btn:hover{background:#ffd633}
+.btn.ghost{background:var(--card);padding:6px 12px;font-weight:700;font-size:.88rem}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+@media(max-width:860px){
+ header p{display:none}
+ .tabs{display:flex;border-bottom:2px solid var(--ink)}
+ .tabs button{flex:1;padding:10px;border:0;background:var(--card);font-weight:700;cursor:pointer}
+ .tabs button[aria-selected=true]{background:var(--ink);color:#fff}
+ main{grid-template-columns:1fr}
+ body[data-view=chat] .sheet,body[data-view=sheet] .chat{display:none}
+ .sheet{border-right:0}
+}
+</style>
+</head>
+<body data-view="sheet">
+<header>
+  <div><h1>Asisten Penilai LKPD</h1><p>Penilaian, umpan balik, dan evaluasi LKPD. Berjalan di browser, tanpa API.</p></div>
+  <button class="btn ghost" id="reset" type="button">Percakapan baru</button>
+</header>
+<div class="tabs" role="tablist">
+  <button role="tab" id="t-sheet" aria-selected="true" type="button">Data LKPD</button>
+  <button role="tab" id="t-chat" aria-selected="false" type="button">Asisten</button>
+</div>
+<main>
+  <section class="sheet" aria-label="Data LKPD">
+    <h2>Data LKPD</h2>
+    <p class="hint">Tersimpan otomatis di browser ini.</p>
+    <div class="row">
+      <label class="f"><span>Mata pelajaran</span><input id="mapel" placeholder="mis. IPA"></label>
+      <label class="f"><span>Kelas</span><input id="kelas" placeholder="mis. VII"></label>
+    </div>
+    <label class="f"><span>Tujuan pembelajaran</span><textarea id="tujuan" placeholder="Peserta didik mampu..."></textarea></label>
+    <div class="row">
+      <label class="f"><span>Nama siswa</span><input id="nama" placeholder="mis. Ayu"></label>
+      <label class="f"><span>KKM</span><input id="kkm" type="number" min="1" max="100"></label>
+    </div>
+    <div id="items"></div>
+    <div class="acts">
+      <button class="btn ghost" id="add" type="button">Tambah soal</button>
+      <button class="btn ghost" id="demo" type="button">Isi contoh</button>
+      <button class="btn" id="to-chat" type="button">Lanjut ke asisten</button>
+    </div>
+  </section>
+  <section class="chat" aria-label="Percakapan">
+    <div id="log" aria-live="polite"></div>
+    <div class="quick" id="quick"></div>
+    <form id="form">
+      <textarea id="input" rows="1" placeholder="Ketik: nilai, umpan balik, evaluasi, rubrik, simpan, rekap" aria-label="Pesan"></textarea>
+      <button class="btn" type="submit">Kirim</button>
+    </form>
+  </section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+//ENGINE_START
+const STOP=new Set("yang dan di ke dari pada untuk dengan adalah ini itu atau sebagai dalam juga akan oleh agar karena dapat para suatu sebuah ada tidak bisa lebih sudah telah saat jika maka serta bahwa dalam".split(" "));
+function stem(w){
+ if(w.length<=4)return w;
+ w=w.replace(/(kah|lah|pun|nya)$/,"");
+ if(w.length>5)w=w.replace(/(kan|an|i)$/,"");
+ return w.replace(/^(meng|meny|mem|men|me|peng|peny|pem|pen|per|ber|ter|di|ke|se|pe)(?=.{4,})/,"");
+}
+const tok=t=>String(t).toLowerCase().match(/[a-z0-9]+/g)||[];
+const stems=(t,ns)=>tok(t).filter(w=>!(ns&&STOP.has(w))).map(stem);
+function lev(a,b){const d=[];for(let i=0;i<=a.length;i++){d[i]=[i];for(let j=1;j<=b.length;j++)d[i][j]=i?0:j}
+ for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+const has=(set,arr,s)=>set.has(s)||(s.length>=5&&arr.some(x=>Math.abs(x.length-s.length)<=1&&lev(x,s)<=1));
+function kwValue(kw,set,arr){let best=0;for(const alt of kw.split("|")){const ks=stems(alt,true);if(!ks.length)continue;const f=ks.filter(k=>has(set,arr,k)).length/ks.length;best=Math.max(best,f>=1?1:f>=.5?.5:0)}return best}
+function cos(a,b){const c=x=>x.reduce((m,w)=>(m[w]=(m[w]||0)+1,m),{});const A=c(a),B=c(b);let dot=0,na=0,nb=0;for(const k in A){na+=A[k]**2;if(B[k])dot+=A[k]*B[k]}for(const k in B)nb+=B[k]**2;return na&&nb?dot/Math.sqrt(na*nb):0}
+function scoreItem(it,i){
+ const max=Math.max(1,+it.max||1),r={i,max,hit:[],part:[],miss:[],ratio:null,score:0,empty:false,short:false};
+ const kws=String(it.kw||"").split(/[,;\n]/).map(s=>s.trim()).filter(Boolean);
+ const key=String(it.kunci||"").trim(),ans=String(it.jawab||"").trim();
+ if(!kws.length&&!key)return r;
+ if(!ans){r.ratio=0;r.empty=true;r.miss=kws.map(k=>k.split("|")[0].trim());return r}
+ const arr=stems(ans,false),set=new Set(arr);let kr=null,sim=null;
+ if(kws.length){let sum=0;for(const k of kws){const v=kwValue(k,set,arr),n=k.split("|")[0].trim();sum+=v;(v===1?r.hit:v>0?r.part:r.miss).push(n)}kr=sum/kws.length}
+ if(key)sim=Math.min(1,cos(stems(ans,true),stems(key,true))/.6);
+ r.ratio=kr!==null&&sim!==null?.65*kr+.35*sim:kr!==null?kr:sim;
+ r.score=Math.round(r.ratio*max*10)/10;r.short=tok(ans).length<5;return r;
+}
+const total=rs=>{const s=rs.filter(r=>r.ratio!==null),m=s.reduce((a,r)=>a+r.max,0);return m?Math.round(s.reduce((a,r)=>a+r.score,0)/m*100):null};
+const predikat=n=>n>=85?"Sangat baik":n>=70?"Baik":n>=55?"Cukup":"Perlu bimbingan";
+const BL=[[6,/\b(rancang|susun|cipta|rumuskan|kembangkan|desain|hasilkan|rencanakan)/],[5,/\b(evaluasi|nilailah|kritik|simpulkan|buktikan|justifikasi|pertimbangkan|putuskan|berikan pendapat|setuju)/],[4,/\b(analisis|bandingkan|hubungkan|kaitkan|selidiki|pilah|kategorikan|bedakan|periksa|uji)/],[3,/\b(hitung|gunakan|terapkan|tentukan|selesaikan|lakukan|praktikkan|demonstrasikan|tunjukkan|buatlah|lengkapi|ukur|amati)/],[2,/\b(jelaskan|uraikan|ringkas|contohkan|klasifikasikan|deskripsikan|tafsirkan|mengapa|bagaimana|kenapa|ceritakan)/],[1,/\b(sebutkan|tuliskan|definisikan|daftar|identifikasi|nyatakan|apa\b|siapa|kapan|di mana|namai|pilih)/]];
+function bloom(s){const t=String(s).toLowerCase();for(const[l,re]of BL)if(re.test(t))return l;return 0}
+//ENGINE_END
+
+let S={mapel:"",kelas:"",tujuan:"",nama:"",kkm:70,items:[{soal:"",kw:"",kunci:"",max:10,jawab:""}],rekap:[]};
+try{Object.assign(S,JSON.parse(localStorage.getItem("lkpd-offline")||"{}"))}catch{}
+const save=()=>{try{localStorage.setItem("lkpd-offline",JSON.stringify(S))}catch{}};
+["mapel","kelas","tujuan","nama","kkm"].forEach(f=>{$(f).value=S[f];$(f).addEventListener("input",()=>{S[f]=f==="kkm"?Math.min(100,Math.max(1,+$(f).value||70)):$(f).value;save()})});
+
+function renderItems(){
+ const box=$("items");box.innerHTML="";
+ S.items.forEach((it,i)=>{
+  const d=document.createElement("div");d.className="item";
+  d.innerHTML=`<div class="ih"><b>Soal ${i+1}</b><span><label>Skor maks <input type="number" min="1" data-k="max" value="${esc(it.max)}"></label> <button type="button" class="link" data-del="1">Hapus</button></span></div>
+  <label class="f"><span>Soal</span><textarea data-k="soal" rows="2" placeholder="Tempel soal atau perintah kegiatan">${esc(it.soal)}</textarea></label>
+  <label class="f"><span>Kata kunci jawaban (pisahkan koma)</span><textarea data-k="kw" rows="2" placeholder="air, karbon dioksida|co2, klorofil">${esc(it.kw)}</textarea></label>
+  <label class="f"><span>Kunci jawaban (opsional)</span><textarea data-k="kunci" rows="2" placeholder="Kalimat jawaban yang benar">${esc(it.kunci)}</textarea></label>
+  <label class="f"><span>Jawaban siswa</span><textarea data-k="jawab" rows="3">${esc(it.jawab)}</textarea></label>`;
+  box.append(d);
+ });
+}
+$("items").addEventListener("input",e=>{const k=e.target.dataset.k;if(!k)return;const i=[...$("items").children].indexOf(e.target.closest(".item"));S.items[i][k]=k==="max"?Math.max(1,+e.target.value||1):e.target.value;save()});
+$("items").addEventListener("click",e=>{if(!e.target.dataset.del)return;const i=[...$("items").children].indexOf(e.target.closest(".item"));S.items.splice(i,1);if(!S.items.length)S.items.push({soal:"",kw:"",kunci:"",max:10,jawab:""});save();renderItems()});
+$("add").onclick=()=>{S.items.push({soal:"",kw:"",kunci:"",max:10,jawab:""});save();renderItems()};
+$("demo").onclick=()=>{Object.assign(S,{mapel:"IPA",kelas:"VIII",nama:"Ayu",tujuan:"Peserta didik mampu menjelaskan proses fotosintesis dan akibat tidak adanya cahaya bagi tumbuhan",items:[
+ {soal:"Sebutkan bahan yang diperlukan tumbuhan untuk fotosintesis!",kw:"air, karbon dioksida|co2, cahaya matahari|sinar matahari, klorofil",kunci:"Bahan fotosintesis adalah air, karbon dioksida, dan cahaya matahari dengan bantuan klorofil.",max:10,jawab:"Tumbuhan butuh air dan sinar matahari serta klorofil di daun."},
+ {soal:"Jelaskan mengapa fotosintesis penting bagi makhluk hidup!",kw:"oksigen, glukosa|makanan, rantai makanan",kunci:"",max:10,jawab:"Fotosintesis menghasilkan oksigen untuk bernapas dan makanan bagi hewan."},
+ {soal:"Analisislah apa yang terjadi pada tumbuhan yang ditaruh di ruang gelap selama seminggu!",kw:"tidak berfotosintesis|tidak dapat berfotosintesis, glukosa berkurang|energi berkurang, layu|mati|pucat",kunci:"",max:10,jawab:""}]});
+ ["mapel","kelas","tujuan","nama"].forEach(f=>$(f).value=S[f]);save();renderItems()};
+
+function setView(v){document.body.dataset.view=v;$("t-sheet").setAttribute("aria-selected",v==="sheet");$("t-chat").setAttribute("aria-selected",v==="chat")}
+$("t-sheet").onclick=()=>setView("sheet");$("t-chat").onclick=()=>setView("chat");$("to-chat").onclick=()=>{setView("chat");$("input").focus()};
+
+const L=a=>a.length?a.map(esc).join(", "):"-";
+const stamp=n=>`<div class="score" role="img" aria-label="Skor ${n} dari 100">${n}<small>dari 100</small></div>`;
+const nm=()=>esc(S.nama.trim()||"siswa");
+const grade=()=>S.items.map((it,i)=>scoreItem(it,i));
+const need=()=>`<p class="bad">Belum ada yang bisa dinilai.</p><p>Isi minimal satu soal dengan <b>kata kunci</b> atau <b>kunci jawaban</b>, lalu isi jawaban siswa. Tombol "Isi contoh" di panel kiri memberi gambaran.</p>`;
+
+function cmdNilai(){
+ const rs=grade(),t=total(rs);if(t===null)return need();
+ const rows=rs.map(r=>r.ratio===null?`<tr><td>${r.i+1}</td><td colspan="3" class="note">Tidak dinilai: belum ada kata kunci atau kunci jawaban.</td></tr>`:`<tr><td>${r.i+1}</td><td>${r.score}/${r.max}</td><td class="ok">${L(r.hit.concat(r.part.map(p=>p+" (sebagian)")))}</td><td class="bad">${r.empty?"Jawaban kosong":L(r.miss)}</td></tr>`).join("");
+ return `${stamp(t)}<h3>Penilaian ${nm()}</h3><p>Predikat: <b>${predikat(t)}</b>. KKM ${S.kkm}: <b>${t>=S.kkm?"tuntas":"belum tuntas"}</b>.</p><table><tr><th>No</th><th>Skor</th><th>Konsep sudah tepat</th><th>Belum muncul</th></tr>${rows}</table><p class="note">Skor dihitung dari kecocokan kata kunci${S.items.some(i=>i.kunci.trim())?" dan kemiripan dengan kunci jawaban":""}. Ini rekomendasi; guru menentukan nilai akhir. Ketik <b>simpan</b> untuk memasukkan ke rekap kelas.</p>`;
+}
+function cmdFeedback(){
+ const rs=grade(),t=total(rs);if(t===null)return need();
+ const open=t>=85?"Hasil kerjamu sangat baik.":t>=70?"Kerjamu sudah baik.":t>=55?"Kamu sudah di jalur yang benar, tinggal sedikit lagi.":"Terima kasih sudah mengerjakan. Mari kita perkuat bersama.";
+ const li=rs.filter(r=>r.ratio!==null).map(r=>{
+  let s=`<li><b>Soal ${r.i+1}</b> (${r.score}/${r.max}): `;
+  if(r.empty)return s+"belum dijawab. Coba kerjakan dulu, sekecil apa pun jawabanmu.</li>";
+  if(r.hit.length)s+=`kamu sudah tepat menyebutkan ${L(r.hit)}. `;
+  if(r.part.length)s+=`${L(r.part)} baru disebut sebagian, lengkapi lagi. `;
+  if(r.miss.length)s+=`Yang belum muncul: ${L(r.miss)}. `;
+  if(r.short)s+="Jawabanmu masih singkat; tambahkan alasan atau contoh. ";
+  if(!r.miss.length&&!r.part.length&&!r.short)s+="jawabanmu sudah lengkap.";
+  return s+"</li>"}).join("");
+ const weak=rs.filter(r=>r.ratio!==null&&r.ratio<.6).map(r=>r.i+1);
+ return `<h3>Umpan balik untuk ${nm()}</h3><p>${open} Skormu <b>${t}</b> (${predikat(t)}).</p><ul>${li}</ul><p><b>Tindak lanjut:</b> ${weak.length?`pelajari ulang materi soal nomor ${weak.join(", ")}, lalu kerjakan kembali.`:t>=S.kkm?"lanjutkan ke soal pengayaan atau bantu temanmu berdiskusi.":"ulangi soal yang masih kurang lengkap."}</p>`;
+}
+function cmdEvaluasi(){
+ const its=S.items.map((it,i)=>({i,s:it.soal.trim(),l:bloom(it.soal),it})).filter(x=>x.s);
+ if(!its.length)return `<p class="bad">Isi dulu kolom Soal pada panel kiri.</p>`;
+ const N={1:"C1 Mengingat",2:"C2 Memahami",3:"C3 Menerapkan",4:"C4 Menganalisis",5:"C5 Mengevaluasi",6:"C6 Mencipta",0:"Tidak terdeteksi"};
+ const rows=its.map(x=>{const w=[];const n=tok(x.s).length;
+  if(n>40)w.push("kalimat terlalu panjang");
+  if(/\b(dll|dsb|dst|dan lain-lain|dan sebagainya)\b/i.test(x.s))w.push("ada kata tidak pasti (dll/dsb)");
+  if(!x.l&&!x.s.includes("?"))w.push("belum ada kata perintah yang jelas");
+  if(!x.it.kw.trim()&&!x.it.kunci.trim())w.push("belum ada kunci penilaian");
+  return `<tr><td>${x.i+1}</td><td>${N[x.l]}</td><td>${w.length?esc(w.join("; ")):'<span class="ok">Sudah jelas</span>'}</td></tr>`}).join("");
+ const hots=its.filter(x=>x.l>=4).length/its.length,lv=new Set(its.map(x=>x.l));
+ const tj=[...new Set(stems(S.tujuan,true).filter(w=>w.length>3))];let cov=null,miss=[];
+ if(tj.length){const all=stems(its.map(x=>x.s).join(" "),true),set=new Set(all);const hit=tj.filter(w=>has(set,all,w));cov=Math.round(hit.length/tj.length*100);miss=tj.filter(w=>!hit.includes(w)).slice(0,6)}
+ const sg=[];
+ if(hots<.3)sg.push("Tambahkan soal tingkat C4 sampai C6 (menganalisis, mengevaluasi, mencipta) agar porsi HOTS minimal sekitar 30%.");
+ if(lv.size<2&&its.length>1)sg.push("Variasikan jenjang berpikir; saat ini semua soal berada pada tingkat yang sama.");
+ if(its.length<3)sg.push("Jumlah soal masih sedikit untuk menggambarkan ketercapaian tujuan.");
+ if(cov!==null&&cov<60)sg.push("Soal belum banyak menyentuh istilah kunci pada tujuan pembelajaran"+(miss.length?` (mis. ${L(miss)})`:"")+".");
+ if(cov===null)sg.push("Isi tujuan pembelajaran agar kesesuaian soal dengan tujuan bisa diperiksa.");
+ if(!sg.length)sg.push("Struktur LKPD sudah seimbang. Pastikan waktu pengerjaan sesuai jumlah soal.");
+ return `<h3>Evaluasi kualitas LKPD</h3><table><tr><th>No</th><th>Jenjang berpikir</th><th>Kejelasan</th></tr>${rows}</table><p>Porsi HOTS (C4-C6): <b>${Math.round(hots*100)}%</b>${cov!==null?`. Kesesuaian dengan tujuan: <b>${cov}%</b>`:""}.</p><ul>${sg.map(s=>`<li>${s}</li>`).join("")}</ul><p class="note">Jenjang berpikir dideteksi dari kata kerja perintah pada soal, jadi hasilnya perkiraan.</p>`;
+}
+function cmdRubrik(){
+ const its=S.items.filter(i=>i.kw.trim());if(!its.length)return `<p class="bad">Isi kata kunci pada soal agar rubrik bisa disusun.</p>`;
+ const rows=its.map(it=>{const k=it.kw.split(/[,;\n]/).map(s=>s.split("|")[0].trim()).filter(Boolean),n=k.length,c=Math.ceil(n*.7),h=Math.ceil(n*.4);
+  return `<tr><td>${S.items.indexOf(it)+1}</td><td>Menyebut semua konsep (${L(k)})</td><td>${c}-${n-1>=c?n-1:c} konsep</td><td>${h}-${c-1>h?c-1:h} konsep</td><td>kurang dari ${h} konsep</td></tr>`}).join("");
+ return `<h3>Rubrik penilaian</h3><table><tr><th>No</th><th>Skor 4 (sangat baik)</th><th>Skor 3 (baik)</th><th>Skor 2 (cukup)</th><th>Skor 1 (kurang)</th></tr>${rows}</table><p class="note">Disusun dari jumlah konsep pada kata kunci. Sesuaikan dengan kebutuhan kelas.</p>`;
+}
+function cmdSimpan(){
+ const rs=grade(),t=total(rs);if(t===null)return need();
+ const name=S.nama.trim()||"Siswa "+(S.rekap.length+1),e={nama:name,skor:t,pct:rs.map(r=>r.ratio===null?null:Math.round(r.ratio*100))},i=S.rekap.findIndex(x=>x.nama===name);
+ i>=0?S.rekap[i]=e:S.rekap.push(e);save();
+ return `<p><b>${esc(name)}</b> (skor ${t}) tersimpan di rekap. Total ${S.rekap.length} siswa. Ganti nama siswa dan jawabannya untuk menambah siswa berikutnya, atau ketik <b>rekap</b>.</p>`;
+}
+function cmdRekap(){
+ const R=S.rekap;if(!R.length)return `<p class="bad">Rekap masih kosong.</p><p>Nilai satu siswa, lalu ketik <b>simpan</b>.</p>`;
+ const sc=R.map(r=>r.skor),avg=Math.round(sc.reduce((a,b)=>a+b,0)/sc.length),tuntas=sc.filter(s=>s>=S.kkm).length;
+ const rows=[...R].sort((a,b)=>b.skor-a.skor).map(r=>`<tr><td>${esc(r.nama)}</td><td>${r.skor}</td><td><div class="bar"><i class="${r.skor<S.kkm?"low":""}" style="width:${r.skor}%"></i></div></td><td>${r.skor>=S.kkm?"Tuntas":"Remedial"}</td></tr>`).join("");
+ const n=Math.max(...R.map(r=>r.pct.length)),ia=[];
+ for(let i=0;i<n;i++){const v=R.map(r=>r.pct[i]).filter(x=>x!=null);if(v.length)ia.push([i+1,Math.round(v.reduce((a,b)=>a+b,0)/v.length)])}
+ const hard=[...ia].sort((a,b)=>a[1]-b[1])[0];
+ return `<h3>Rekap kelas</h3><p>Siswa: <b>${R.length}</b>. Rata-rata: <b>${avg}</b>. Tertinggi: <b>${Math.max(...sc)}</b>. Terendah: <b>${Math.min(...sc)}</b>. Tuntas (KKM ${S.kkm}): <b>${tuntas}/${R.length}</b>.</p><table><tr><th>Nama</th><th>Skor</th><th></th><th>Status</th></tr>${rows}</table>${ia.length?`<p><b>Analisis butir soal</b> (rata-rata ketercapaian): ${ia.map(([i,p])=>`soal ${i}: ${p}%`).join(", ")}.${hard&&hard[1]<70?` Soal ${hard[0]} paling sulit; pertimbangkan membahasnya ulang di kelas.`:""}</p>`:""}<p class="note">Ketik <b>hapus rekap</b> untuk mengosongkan.</p>`;
+}
+const HELP=`<h3>Yang bisa saya lakukan</h3><ul><li><b>nilai</b>: menilai jawaban siswa dari kata kunci dan kunci jawaban</li><li><b>umpan balik</b>: umpan balik untuk siswa</li><li><b>evaluasi</b>: menilai kualitas LKPD (jenjang berpikir, kejelasan, kesesuaian tujuan)</li><li><b>rubrik</b>: menyusun rubrik 4 level</li><li><b>simpan</b> dan <b>rekap</b>: rekap nilai dan analisis butir soal</li></ul><p class="note">Tips: tulis sinonim dengan tanda |, mis. <code>karbon dioksida|co2</code>, agar jawaban yang benar tapi beda kata tetap terbaca.</p>`;
+const CMDS=[["Nilai jawaban","nilai",cmdNilai],["Umpan balik","umpan balik",cmdFeedback],["Evaluasi LKPD","evaluasi",cmdEvaluasi],["Buat rubrik","rubrik",cmdRubrik],["Simpan ke rekap","simpan",cmdSimpan],["Rekap kelas","rekap",cmdRekap]];
+function route(t){t=t.toLowerCase();
+ if(/hapus.*rekap|reset rekap/.test(t)){S.rekap=[];save();return"<p>Rekap dikosongkan.</p>"}
+ if(/rubrik/.test(t))return cmdRubrik();if(/simpan/.test(t))return cmdSimpan();if(/rekap|rata-rata|kelas/.test(t))return cmdRekap();
+ if(/umpan|feedback|masukan|saran/.test(t))return cmdFeedback();if(/evaluasi|kualitas|lkpd|soal/.test(t))return cmdEvaluasi();
+ if(/nilai|skor|periksa|koreksi|jawaban/.test(t))return cmdNilai();
+ if(/bantuan|help|bisa apa|cara/.test(t))return HELP;
+ return `<p>Saya belum mengerti perintah itu. Coba salah satu: nilai, umpan balik, evaluasi, rubrik, simpan, rekap.</p>`}
+
+function add(role,html){const d=document.createElement("div");d.className="msg "+(role==="user"?"user":"bot");role==="user"?d.textContent=html:d.innerHTML=html;$("log").append(d);$("log").scrollTop=$("log").scrollHeight}
+function chips(el,cls){CMDS.forEach(([l,c])=>{const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=l;b.onclick=()=>send(c);el.append(b)})}
+function showEmpty(){$("log").innerHTML='<div class="empty"><h2>Apa yang ingin dinilai?</h2><p>Isi data LKPD di panel kiri (atau klik "Isi contoh"), lalu pilih tugas.</p><div class="chips" id="chips"></div></div>';chips($("chips"));$("quick").innerHTML=""}
+let started=false;
+function send(t){t=t.trim();if(!t)return;if(!started){$("log").innerHTML="";started=true;chips($("quick"))}setView("chat");add("user",t);setTimeout(()=>add("bot",route(t)),150)}
+$("form").onsubmit=e=>{e.preventDefault();const v=$("input").value;$("input").value="";$("input").style.height="";send(v)};
+$("input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("form").requestSubmit()}});
+$("input").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,120)+"px"});
+$("reset").onclick=()=>{started=false;showEmpty()};
+renderItems();showEmpty();
+</script>
+</body>
+</html>
